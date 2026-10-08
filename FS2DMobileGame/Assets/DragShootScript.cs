@@ -1,11 +1,8 @@
-using System.Threading;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using UnityEditorInternal;
+using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.UI;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
-using UnityEngine.Rendering;
 
 
 
@@ -23,8 +20,7 @@ public class DragShootScript : MonoBehaviour
     
 
 
-    private float currentTime = 0;
-    private bool buttonHeld = false;
+
 
 
     private Rigidbody2D rb;
@@ -32,6 +28,8 @@ public class DragShootScript : MonoBehaviour
     private Vector3 startPoint;
     private LineRenderer lineRenderer;
     private InputAction touchDrag;
+    private Vector2 MainTouchVector;
+    private Vector2 CurrentDragVector;
 
 
 
@@ -40,7 +38,7 @@ public class DragShootScript : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        EnhancedTouchSupport.Enable();
         touchDrag = inputActions.FindAction("TouchDrag");
         print("start");
         GetComponent<Rigidbody2D>().gravityScale = gravitySlider.GetComponent<Slider>().value;
@@ -85,64 +83,82 @@ public class DragShootScript : MonoBehaviour
 
     void Update()
     {
-        /*
+        MainTouchVector = CurrentTouch();
+        GetComponent<Rigidbody2D>().gravityScale = gravitySlider.GetComponent<Slider>().value;
 
-                GetComponent<Rigidbody2D>().gravityScale = gravitySlider.GetComponent<Slider>().value;
-                if (touchDrag.WasPressedThisFrame()) 
+
+        if (MainTouchVector == new Vector2(-1, -1))
+        {
+            lineRenderer.enabled = false;
+        }
+        else if(MainTouchVector == new Vector2(-2, -2))
+        {
+            CurrentDragVector = Vector2.ClampMagnitude(CurrentDragVector, maxDragDistance);
+            Vector2 force = CurrentDragVector * power;
+            rb.AddForce(force, ForceMode2D.Impulse);
+
+
+        }
+        else
+        {
+            MainTouchVector = Vector2.ClampMagnitude(MainTouchVector, maxDragDistance);
+            lineRenderer.enabled = true;
+            ShowTrajectory(MainTouchVector * power);
+            CurrentDragVector = MainTouchVector;
+        }
+
+        /*GetComponent<Rigidbody2D>().gravityScale = gravitySlider.GetComponent<Slider>().value;
+        if () 
+        {
+            lineRenderer.enabled = true;
+
+            startPoint = cam.ScreenToViewportPoint();
+            startPoint.z = 0;
+            buttonHeld = true;
+        }
+        if (touchDrag.ReadValue<float>() > 0.5f )
+        {
+            Vector3 currentPoint = cam.ScreenToWorldPoint(Input.mousePosition);
+            currentPoint.z = 0;
+
+            Vector2 dragVector = startPoint - currentPoint;
+            dragVector = Vector2.ClampMagnitude(dragVector, maxDragDistance);
+
+                ShowTrajectory(dragVector * power);
+
+
+
+        }
+        if (touchDrag.ReadValue<float>() < 0.5f && buttonHeld == true)
+        {
+            buttonHeld = false;
+                Vector3 endPoint = cam.ScreenToWorldPoint(Input.mousePosition);
+                endPoint.z = 0;
+
+                Vector2 force = (startPoint - endPoint) * power;
+                rb.AddForce(force, ForceMode2D.Impulse);
+
+            lineRenderer.enabled = false;
+
+
+        }*/
+
+        void ShowTrajectory(Vector2 initialForce)
+            {
+                lineRenderer.positionCount = trajectoryResolution;
+
+                Vector3[] points = new Vector3[trajectoryResolution];
+                Vector2 velocity = initialForce / rb.mass;
+                Vector2 startPos = transform.position;
+
+                for (int i = 0; i < points.Length; i++)
                 {
-                    lineRenderer.enabled = true;
-
-                    startPoint = cam.ScreenToViewportPoint();
-                    startPoint.z = 0;
-                    buttonHeld = true;
+                    float t = i * Time.fixedDeltaTime;
+                    Vector2 pos = startPos + velocity * t + 0.5f * Physics2D.gravity * t * t;
+                    points[i] = pos;
                 }
-                if (touchDrag.ReadValue<float>() > 0.5f )
-                {
-                    Vector3 currentPoint = cam.ScreenToWorldPoint(Input.mousePosition);
-                    currentPoint.z = 0;
-
-                    Vector2 dragVector = startPoint - currentPoint;
-                    dragVector = Vector2.ClampMagnitude(dragVector, maxDragDistance);
-
-                        ShowTrajectory(dragVector * power);
-
-
-
-                }
-                if (touchDrag.ReadValue<float>() < 0.5f && buttonHeld == true)
-                {
-                    buttonHeld = false;
-                        Vector3 endPoint = cam.ScreenToWorldPoint(Input.mousePosition);
-                        endPoint.z = 0;
-
-                        Vector2 force = (startPoint - endPoint) * power;
-                        rb.AddForce(force, ForceMode2D.Impulse);
-
-                    lineRenderer.enabled = false;
-
-
-                }
-
-                void ShowTrajectory(Vector2 initialForce)
-                {
-                    lineRenderer.enabled = true;
-                    lineRenderer.positionCount = trajectoryResolution;
-
-                    Vector3[] points = new Vector3[trajectoryResolution];
-                    Vector2 velocity = initialForce / rb.mass;
-                    Vector2 startPos = transform.position;
-
-                    for (int i = 0; i < points.Length; i++)
-                    {
-                        float t = i * Time.fixedDeltaTime;
-                        Vector2 pos = startPos + velocity * t + 0.5f * Physics2D.gravity * t * t;
-                        points[i] = pos;
-
-
-
-                    }
-                    lineRenderer.SetPositions(points);
-    }*/
+                lineRenderer.SetPositions(points);
+            }
 
 
 
@@ -153,27 +169,24 @@ public class DragShootScript : MonoBehaviour
 
     UnityEngine.Vector2 CurrentTouch()
     {
-        Touch TouchReturn;
+
         foreach (Touch CurrentTouch in Touch.activeTouches)
         {
             if (CurrentTouch.phase == UnityEngine.InputSystem.TouchPhase.Ended)
             {
-                continue;
+                return new Vector2 (-2, -2);
             }
 
-            else if (CurrentTouch.phase == UnityEngine.InputSystem.TouchPhase.Stationary)
-            {
-                continue;
-            }
-            else
-            {
-                return CurrentTouch.screenPosition;
-            }
+                print(CurrentTouch.screenPosition - CurrentTouch.startScreenPosition);
+                return (CurrentTouch.screenPosition - CurrentTouch.startScreenPosition);
+            
+
 
 
         }
         return new Vector2(-1, -1);
     }
+
 
 
 }

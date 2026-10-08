@@ -8,12 +8,12 @@ public class PauseMenuScript : MonoBehaviour
 {
     [SerializeField] private InputActionAsset inputActions;
 
-    private bool isPaused = false;
     [SerializeField] private GameObject PauseButton;
     private InputAction Pause;
 
     [SerializeField] private GameObject ResumeButton;
     private InputAction Resume;
+    private bool isPaused;
 
     [SerializeField] private GameObject QuitButton;
     private InputAction Quit;
@@ -42,7 +42,13 @@ public class PauseMenuScript : MonoBehaviour
         }
 
     }
-
+    private void OnApplicationFocus(bool focus)
+    {
+        if (!focus)
+        {
+            PauseGame();
+        }
+    }
 
     public void ResumeGame()
     {
