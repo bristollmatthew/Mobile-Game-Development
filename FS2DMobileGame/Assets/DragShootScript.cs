@@ -15,7 +15,6 @@ public class DragShootScript : MonoBehaviour
     public float maxDragDistance = 5f;
     public int trajectoryResolution = 30;
     public Color color;
-    public float scale;
     public GameObject gravitySlider;
     
 
@@ -42,10 +41,8 @@ public class DragShootScript : MonoBehaviour
         touchDrag = inputActions.FindAction("TouchDrag");
         print("start");
         GetComponent<Rigidbody2D>().gravityScale = gravitySlider.GetComponent<Slider>().value;
-        scale = Random.Range(0.4f, 0.6f);
         color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
-        this.transform.localScale += new Vector3(scale, scale, scale);
-        GetComponent<Renderer>().material.color = color;
+        GetComponent<MeshRenderer>().material.color = color;
         GetComponent<LineRenderer>().material.color = color;
 
 
