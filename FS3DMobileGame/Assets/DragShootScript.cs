@@ -1,10 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
-
+using TMPro;
+using System.Linq;
+using Unity.VectorGraphics;
+using UnityEngine.SceneManagement;
 
 
 public class DragShootScript : MonoBehaviour
@@ -16,13 +20,14 @@ public class DragShootScript : MonoBehaviour
     public float maxDragDistance = 5f;
     public int trajectoryResolution = 30;
     public Color color;
+    public int Score;
+    public TMP_Text ScoreText;
     
-    
 
 
 
 
-
+    private bool grounded = true;
     private Rigidbody rb;
     private Camera cam;
     private Vector3 startPoint;
@@ -30,21 +35,24 @@ public class DragShootScript : MonoBehaviour
     private InputAction touchDrag;
     private Vector2 MainTouchVector;
     private Vector2 CurrentDragVector;
+    private GameObject LastCollidedObject;
 
 
 
-
-
+    private void Awake()
+    {
+        EnhancedTouchSupport.Enable();
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        EnhancedTouchSupport.Enable();
+
         touchDrag = inputActions.FindAction("TouchDrag");
         print("start");
         GetComponent<Rigidbody>().mass = 1;
         color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
         GetComponent<MeshRenderer>().material.color = color;
-        GetComponent<LineRenderer>().material.color = color;
+        GetComponent<LineRenderer>().material.color = color + new Color(0.1f,0.1f,0.1f);
 
 
         rb = GetComponent<Rigidbody>();
@@ -55,27 +63,58 @@ public class DragShootScript : MonoBehaviour
     }
 
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Ground")
+        {
+            grounded = true;
+            rb.linearVelocity = Vector3.zero;
+            if(LastCollidedObject != collision.gameObject)
+            {
+                Score = Score + 1;
+                ScoreText.text = "Score: " + Score;
+                LastCollidedObject = collision.gameObject;
+                collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
+
+            }
+
+
+        }
+        else if(collision.gameObject.tag == "Destroyer")
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
+        }
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        collision.gameObject.GetComponent<Transform>().localScale = collision.gameObject.GetComponent<Transform>().localScale - new Vector3(0.1f, 0f, 0f);
+    }
+
 
     void Update()
     {
-        // Check if drag released this frame
-        Vector2 releaseDirection = GetReleasedDragDirection();
-        if (releaseDirection != Vector2.zero)
+        if (grounded == true)
         {
-            lineRenderer.enabled = false;
-            rb.AddForce(Vector2.ClampMagnitude(releaseDirection, maxDragDistance), ForceMode.Impulse);
-        }
-        else 
-        {
-            // If Not Released Do This
-            Vector2 lineDirection = GetCurrentDragDirection();
-            if (lineDirection != Vector2.zero) 
+            // Check if drag released this frame
+            Vector2 releaseDirection = GetReleasedDragDirection();
+            if (releaseDirection != Vector2.zero)
             {
-                lineRenderer.enabled = true;
-                ShowTrajectory(lineDirection * power);
+                lineRenderer.enabled = false;
+                rb.AddForce(Vector2.ClampMagnitude(releaseDirection, maxDragDistance), ForceMode.Impulse);
+                grounded = false;
             }
-        }
+            else
+            {
+                // If Not Released Do This
+                Vector2 lineDirection = GetCurrentDragDirection();
+                if (lineDirection != Vector2.zero)
+                {
+                    lineRenderer.enabled = true;
+                    ShowTrajectory(lineDirection * power);
+                }
+            }
 
+        }
 
 
 
