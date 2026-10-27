@@ -13,7 +13,7 @@ public class PauseMenuScript : MonoBehaviour
 
     [SerializeField] private GameObject ResumeButton;
     private InputAction Resume;
-    private bool isPaused;
+    public bool isPaused;
 
     [SerializeField] private GameObject QuitButton;
     private InputAction Quit;
@@ -55,6 +55,7 @@ public class PauseMenuScript : MonoBehaviour
         MenuUI.SetActive(false);
         PauseButton.SetActive(true);
         Time.timeScale = 1f;
+        isPaused = false;
     }
     public void PauseGame()
     {

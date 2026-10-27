@@ -22,6 +22,7 @@ public class DragShootScript : MonoBehaviour
     public Color color;
     public int Score;
     public TMP_Text ScoreText;
+    public Canvas MainCanvas;
     
 
 
@@ -48,7 +49,6 @@ public class DragShootScript : MonoBehaviour
     {
 
         touchDrag = inputActions.FindAction("TouchDrag");
-        print("start");
         GetComponent<Rigidbody>().mass = 1;
         color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
         GetComponent<MeshRenderer>().material.color = color;
@@ -85,6 +85,7 @@ public class DragShootScript : MonoBehaviour
             UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
         }
     }
+    
     private void OnCollisionExit(Collision collision)
     {
         collision.gameObject.GetComponent<Transform>().localScale = collision.gameObject.GetComponent<Transform>().localScale - new Vector3(0.1f, 0f, 0f);
@@ -93,7 +94,7 @@ public class DragShootScript : MonoBehaviour
 
     void Update()
     {
-        if (grounded == true)
+        if (grounded == true && MainCanvas.GetComponent<PauseMenuScript>().isPaused == false)
         {
             // Check if drag released this frame
             Vector2 releaseDirection = GetReleasedDragDirection();
