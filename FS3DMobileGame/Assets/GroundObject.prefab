@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 6466747685661839537}
   - component: {fileID: 7345099825757010691}
   - component: {fileID: 1086087736755779521}
-  - component: {fileID: 5586082774202557887}
+  - component: {fileID: 1707871537992692904}
+  - component: {fileID: 6457040864030384456}
   m_Layer: 0
   m_Name: GroundObject
   m_TagString: Ground
@@ -91,7 +92,7 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5586082774202557887
+--- !u!65 &1707871537992692904
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -110,5 +111,17 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 0, z: 1}
-  m_Center: {x: 0, y: 0.50015944, z: 0}
+  m_Size: {x: 1, y: 0.00025142063, z: 1}
+  m_Center: {x: 0, y: 0.49980143, z: 0}
+--- !u!114 &6457040864030384456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8988278481982941647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80f5f9a4edff40e43a11c4ca8af4484f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GroundScript

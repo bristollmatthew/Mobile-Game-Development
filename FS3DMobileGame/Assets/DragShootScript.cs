@@ -1,14 +1,13 @@
+using JetBrains.Annotations;
+using System.Collections;
+using System.Linq;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
-using UnityEngine.SocialPlatforms.Impl;
-using UnityEngine.UI;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
-using TMPro;
-using System.Linq;
-using Unity.VectorGraphics;
-using UnityEngine.SceneManagement;
 
 
 public class DragShootScript : MonoBehaviour
@@ -23,11 +22,11 @@ public class DragShootScript : MonoBehaviour
     public int Score;
     public TMP_Text ScoreText;
     public Canvas MainCanvas;
-    
 
 
 
 
+    private bool shootingDisabled = false;
     private bool grounded = true;
     private Rigidbody rb;
     private Camera cam;
@@ -37,6 +36,9 @@ public class DragShootScript : MonoBehaviour
     private Vector2 MainTouchVector;
     private Vector2 CurrentDragVector;
     private GameObject LastCollidedObject;
+
+    public GameObject collidedObject;
+
 
 
 
@@ -52,57 +54,88 @@ public class DragShootScript : MonoBehaviour
         GetComponent<Rigidbody>().mass = 1;
         color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
         GetComponent<MeshRenderer>().material.color = color;
-        GetComponent<LineRenderer>().material.color = color + new Color(0.1f,0.1f,0.1f);
-
+        GetComponent<LineRenderer>().material.color = color + new Color(0.1f,0.1f,0.1f, 0.5f);
+        
 
         rb = GetComponent<Rigidbody>();
         cam = Camera.main;
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.enabled = false;
 
+        Screen.autorotateToLandscapeLeft = true;
+        Screen.autorotateToLandscapeRight = true;
+        Screen.autorotateToPortrait = false;
+        Screen.autorotateToPortraitUpsideDown = false;
+        Screen.orientation = ScreenOrientation.AutoRotation;
     }
 
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.tag == "Ground")
+        if (collision.gameObject.tag == "Ground")
         {
             grounded = true;
             rb.linearVelocity = Vector3.zero;
-            if(LastCollidedObject != collision.gameObject)
+            if (LastCollidedObject != collision.gameObject && LastCollidedObject != null)
             {
-                Score = Score + 1;
+                Score++;
                 ScoreText.text = "Score: " + Score;
                 LastCollidedObject = collision.gameObject;
                 collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
 
             }
+            else if (LastCollidedObject == null) 
+            {
+                LastCollidedObject = collision.gameObject;
+                collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
+            }
 
 
         }
-        else if(collision.gameObject.tag == "Destroyer")
+        else if (collision.gameObject.tag == "Destroyer")
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
         }
     }
-    
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        collision.gameObject.GetComponent<Transform>().localScale = collision.gameObject.GetComponent<Transform>().localScale - new Vector3(0.1f, 0f, 0f);
+        if (other.gameObject.tag == "AntiShoot")
+        {
+            shootingDisabled = true;
+        }
     }
 
+    private void OnCollisionExit(Collision _collision)
+    {
+        Debug.Log(_collision.gameObject.name);
+        collidedObject = _collision.gameObject;
+
+        // Should only continue if leavig ground
+        if (_collision.gameObject.tag != "Ground" || _collision.gameObject == gameObject)
+            return;
+
+        _collision.gameObject.GetComponent<GroundScript>().StartShrinking();
+
+
+
+
+    }
 
     void Update()
     {
-        if (grounded == true && MainCanvas.GetComponent<PauseMenuScript>().isPaused == false)
+        if (grounded == true && MainCanvas.GetComponent<PauseMenuScript>().isPaused == false && shootingDisabled == false)
         {
             // Check if drag released this frame
             Vector2 releaseDirection = GetReleasedDragDirection();
-            if (releaseDirection != Vector2.zero)
+            if (releaseDirection != Vector2.zero && releaseDirection.y > 0)
             {
                 lineRenderer.enabled = false;
                 rb.AddForce(Vector2.ClampMagnitude(releaseDirection, maxDragDistance), ForceMode.Impulse);
                 grounded = false;
+            }
+            if (releaseDirection != Vector2.zero && releaseDirection.y < 0)
+            {
+                lineRenderer.enabled = false;
             }
             else
             {
@@ -127,15 +160,19 @@ public class DragShootScript : MonoBehaviour
         Vector3[] points = new Vector3[trajectoryResolution];
 
         //Because I am changing the mass of the rigid body this could break things:: \_(0_0)_/
-        Vector2 velocity = initialForce / rb.mass;
+        Vector3 velocity = initialForce / rb.mass;
 
-        Vector2 startPos = transform.position;
+        Vector3 startPos = transform.position;
 
         for (int i = 0; i < points.Length; i++)
         {
             float t = i * Time.fixedDeltaTime;
-            Vector2 pos = startPos + velocity * t + 0.5f * Physics2D.gravity * t * t;
-            points[i] = pos;
+            Vector3 pos = (startPos + velocity * t + 0.5f * Physics.gravity * t * t);
+            /*if (i != 0){
+                pos = pos - new Vector3(0, (2 * i) + 0.5f * (-i ^ 2), 0);
+            }*/
+            pos.z = -1;
+            points[(int)i] = pos;
         }
         lineRenderer.SetPositions(points);
     }
