@@ -5,8 +5,10 @@ public class GroundScript : MonoBehaviour
     float lastShrinkStartTime;
     bool isShrinking;
     float shrinkDuration = 2;
+    float startHight = 0;
     float startWidth = 0;
     float widthDecrease = 0.3f;
+    float hightChange = 0;
     public void StartShrinking()
     {
         if (isShrinking)
@@ -15,6 +17,16 @@ public class GroundScript : MonoBehaviour
         lastShrinkStartTime = Time.time;
         isShrinking = true;
         startWidth = gameObject.transform.localScale.x;
+        startHight = gameObject.transform.localScale.y;
+        hightChange = Random.Range(-5, 5);
+        if (startHight - hightChange < 0)
+        {
+            hightChange = 2;
+        }
+        else if(startHight + hightChange > 22)
+        { 
+            hightChange = -2;
+        }
     }
 
 
@@ -29,8 +41,9 @@ public class GroundScript : MonoBehaviour
             else
             {
                 //Math.f lerp doesn't work here don't suggest it
-                float Value = startWidth - (widthDecrease * ((Time.time - lastShrinkStartTime) / shrinkDuration));
-                gameObject.transform.localScale = new Vector3(Value, gameObject.transform.localScale.y, gameObject.transform.localScale.z);
+                float HValue = startHight - (hightChange * ((Time.time - lastShrinkStartTime) / shrinkDuration));
+                float WValue = startWidth - (widthDecrease * ((Time.time - lastShrinkStartTime) / shrinkDuration));
+                gameObject.transform.localScale = new Vector3(WValue, HValue, gameObject.transform.localScale.z);
 
             }
         }

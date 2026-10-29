@@ -22,6 +22,7 @@ public class DragShootScript : MonoBehaviour
     public int Score;
     public TMP_Text ScoreText;
     public Canvas MainCanvas;
+    public GameObject Particle;
 
 
 
@@ -49,7 +50,7 @@ public class DragShootScript : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        Application.targetFrameRate = 60;
         touchDrag = inputActions.FindAction("TouchDrag");
         GetComponent<Rigidbody>().mass = 1;
         color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
@@ -82,6 +83,9 @@ public class DragShootScript : MonoBehaviour
                 ScoreText.text = "Score: " + Score;
                 LastCollidedObject = collision.gameObject;
                 collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
+                Instantiate(Particle, this.transform.position - new Vector3(0f,0.5f,4f), new Quaternion(0,-180,0,0));
+                var main = Particle.gameObject.GetComponent<ParticleSystem>().main;
+                main.startColor = collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color;
 
             }
             else if (LastCollidedObject == null) 
@@ -102,6 +106,7 @@ public class DragShootScript : MonoBehaviour
         if (other.gameObject.tag == "AntiShoot")
         {
             shootingDisabled = true;
+            lineRenderer.enabled = false;
         }
     }
 
