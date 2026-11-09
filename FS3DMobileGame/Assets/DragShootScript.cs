@@ -1,5 +1,6 @@
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -22,6 +23,9 @@ public class DragShootScript : MonoBehaviour
     public GameObject Particle;
     public int stepmultiplier;
 
+    public GameObject Platform1;
+    public GameObject Platform2;
+
 
 
 
@@ -41,6 +45,7 @@ public class DragShootScript : MonoBehaviour
 
 
     public GameObject collidedObject;
+    const int RGBMax = 255;
 
 
     
@@ -102,8 +107,12 @@ public class DragShootScript : MonoBehaviour
                 var main = Particle.gameObject.GetComponent<ParticleSystem>().main;
                 main.startColor = collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color;
 
+
+
+
+
                 //Save Data Stuff
-                if(SavegamePointer.currentData.highscore <= Score)
+                if (SavegamePointer.currentData.highscore <= Score)
                 {
 
                     SavegamePointer.currentData.highscore = Score;
@@ -120,13 +129,23 @@ public class DragShootScript : MonoBehaviour
                 if (HiScore == 0 & Score == 1)
                 {
                     int DisplayHiScore = 1;
-                    ScoreText.text = "Score: " + Score + "Hi: " + DisplayHiScore;
+                    ScoreText.text = "Score: " + Score + " Hi: " + DisplayHiScore;
                 }
                 else
                 {
                     int DisplayHiScore = HiScore + 1;
-                    ScoreText.text = "Score: " + Score + "Hi: " + DisplayHiScore;
+                    ScoreText.text = "Score: " + Score + " Hi: " + DisplayHiScore;
                 }
+
+                //Update Color
+
+                Color Platform1Color = Platform1.GetComponent<MeshRenderer>().material.color;
+                Color Platform2Color = Platform2.GetComponent<MeshRenderer>().material.color;
+
+                Color NEWcolor = new Color(((Platform1Color.r + Platform2Color.r) / 2f), ((Platform1Color.g + Platform2Color.g) / 2f), ((Platform1Color.b + Platform2Color.b) / 2f), 1f);
+
+                GetComponent<MeshRenderer>().material.color = NEWcolor;
+                GetComponent<LineRenderer>().material.color = NEWcolor + new Color(0.1f, 0.1f, 0.1f, 0.5f);
 
 
 
@@ -251,6 +270,11 @@ public class DragShootScript : MonoBehaviour
         return Vector2.zero;
     }
 
+    Color InvertColor( Color color)
+    {
+
+        return new Color(RGBMax - color.r, RGBMax - color.g, RGBMax - color.b, 100);
+    }
 
 
 }

@@ -635,7 +635,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 92.953735, y: -61.223633}
+  m_AnchoredPosition: {x: 92.95361, y: -61.223633}
   m_SizeDelta: {x: 150, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &330585543
@@ -1371,6 +1371,8 @@ MonoBehaviour:
   MainCanvas: {fileID: 1785141360}
   Particle: {fileID: 1709870745522451192, guid: 86b7d803dd9c1494f9f9b91d7d72fe20, type: 3}
   stepmultiplier: 1
+  Platform1: {fileID: 1905241817}
+  Platform2: {fileID: 1554406683}
   SaveGame: {fileID: 1229336897}
   collidedObject: {fileID: 0}
 --- !u!1 &783495697
@@ -1965,7 +1967,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -300.7174, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
