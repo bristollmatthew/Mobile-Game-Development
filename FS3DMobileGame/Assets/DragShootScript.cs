@@ -146,7 +146,8 @@ public class DragShootScript : MonoBehaviour
 
 
                 Color.RGBToHSV(PlayerNewColor, out float H, out float S, out float V);
-                PlayerNewColor = Color.HSVToRGB(H + 0.5f%1f, S, V);
+                PlayerNewColor = Color.HSVToRGB(H + 0.5f % 1f, S, V);
+                PlayerNewColor = new Color(Mathf.Clamp(PlayerNewColor.r,0.2f,1f),Mathf.Clamp(PlayerNewColor.g,0.2f,1f),Mathf.Clamp(PlayerNewColor.b,0.2f,1f));
 
                 GetComponent<MeshRenderer>().material.color = PlayerNewColor;
                 GetComponent<LineRenderer>().material.color = PlayerNewColor + new Color(0.1f, 0.1f, 0.1f, 0.5f);
@@ -208,6 +209,8 @@ public class DragShootScript : MonoBehaviour
             if (releaseDirection != Vector2.zero && releaseDirection.y < 0)
             {
                 lineRenderer.enabled = false;
+                rb.AddForce(Vector2.ClampMagnitude(-releaseDirection, maxDragDistance), ForceMode.Impulse);
+                grounded = false;
             }
             else
             {
