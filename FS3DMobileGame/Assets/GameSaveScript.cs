@@ -12,9 +12,7 @@ public class GameSaveScript : MonoBehaviour
         public long saveCounter;
         public string saveID;
 
-
         public int highscore;
-
 
         public float playtimeSeconds;
 
@@ -31,11 +29,6 @@ public class GameSaveScript : MonoBehaviour
     string json;
     public string filePath;
 
-    public void Start()
-    {
-
-    }
-
     public void SaveGame(saveData data)
     {
         string jsonString = JsonUtility.ToJson(data);
@@ -46,39 +39,26 @@ public class GameSaveScript : MonoBehaviour
 
         /*PlayerPrefs.SetString("GameSave", jsonString);
         PlayerPrefs.Save();*/
-
     }
     public saveData LoadGame()
     {
-        if (PlayerPrefs.HasKey("GameSave")) 
+        if (File.Exists(filePath)) 
         {
             string jsonString = File.ReadAllText(filePath);
             saveData data = JsonUtility.FromJson<saveData>(jsonString);
             return data;
         }
         return new saveData();
-
-
     }
-
-
-
-    private void Update()
-    {
-        
-    }
-
-
-
     void Awake()
     {
-
-        if (First != null)
+        //ClearSave(); //REMOVE
+        /*if (First != null)
         {
             Destroy(this.gameObject);
             return;
 
-        }
+        }*/
         filePath = UnityEngine.Application.persistentDataPath + "/playerdata.json";
         First = this;
         DontDestroyOnLoad(this.gameObject);
@@ -87,12 +67,7 @@ public class GameSaveScript : MonoBehaviour
     }
     void Paused()
     {
-
        SaveGame(currentData);
-
-
-
-
     }
     private void OnApplicationFocus(bool focus)
     {
@@ -101,5 +76,10 @@ public class GameSaveScript : MonoBehaviour
     private void OnApplicationPause(bool pause)
     {
         SaveGame(currentData);
+    }
+    public void ClearSave()
+    {
+        if (File.Exists(filePath))
+            File.Delete(filePath);
     }
 }

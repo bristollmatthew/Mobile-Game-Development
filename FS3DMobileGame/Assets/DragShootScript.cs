@@ -1,11 +1,11 @@
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
+using System.Collections;
 
 
 public class DragShootScript : MonoBehaviour
@@ -39,6 +39,9 @@ public class DragShootScript : MonoBehaviour
     private Vector2 MainTouchVector;
     private Vector2 CurrentDragVector;
     private GameObject LastCollidedObject;
+    private bool RoutineActive;
+    private Color FloorNewColor;
+    private Color FloorOldColor;
 
     public GameObject SaveGame;
     private GameSaveScript SavegamePointer;
@@ -98,14 +101,18 @@ public class DragShootScript : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
             if (LastCollidedObject != collision.gameObject && LastCollidedObject != null)
             {
-                int HiScore = SavegamePointer.currentData.highscore;
+                
                 //In-game Stuff
                 Score++;
                 LastCollidedObject = collision.gameObject;
-                collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
                 Instantiate(Particle, this.transform.position - new Vector3(0f,0.5f,4f), new Quaternion(0,-180,0,0));
                 var main = Particle.gameObject.GetComponent<ParticleSystem>().main;
-                main.startColor = collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color;
+
+
+                FloorNewColor = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
+                FloorOldColor = collision.gameObject.GetComponent<MeshRenderer>().material.color;
+
+                StartCoroutine(collision.gameObject.GetComponent<GroundScript>().ColorChange(FloorOldColor, FloorNewColor));
 
 
 
@@ -114,38 +121,28 @@ public class DragShootScript : MonoBehaviour
                 //Save Data Stuff
                 if (SavegamePointer.currentData.highscore <= Score)
                 {
-
                     SavegamePointer.currentData.highscore = Score;
+                    SavegamePointer.SaveGame(SavegamePointer.currentData);
                 }
-                SavegamePointer.SaveGame(SavegamePointer.currentData);
 
                 //Output
 
-
-                //HiScore displays as 1 less than score when a new save is created, and score both Score and HiScore = 1
-                //This is a temporary Fix & Unoptimal Do Not Allow in Final Build
-                //If This Makes It To Final Build Richard Please Don't Let Me Hear The End Of It
-
-                if (HiScore == 0 & Score == 1)
-                {
-                    int DisplayHiScore = 1;
-                    ScoreText.text = "Score: " + Score + " Hi: " + DisplayHiScore;
-                }
-                else
-                {
-                    int DisplayHiScore = HiScore + 1;
-                    ScoreText.text = "Score: " + Score + " Hi: " + DisplayHiScore;
-                }
+                ScoreText.text = "Score: " + Score + " Hi: " + SavegamePointer.currentData.highscore;
 
                 //Update Color
 
                 Color Platform1Color = Platform1.GetComponent<MeshRenderer>().material.color;
                 Color Platform2Color = Platform2.GetComponent<MeshRenderer>().material.color;
 
-                Color NEWcolor = new Color(((Platform1Color.r + Platform2Color.r) / 2f), ((Platform1Color.g + Platform2Color.g) / 2f), ((Platform1Color.b + Platform2Color.b) / 2f), 1f);
+                Color PlayerNewColor = new Color(((Platform1Color.r + Platform2Color.r) / 2f), ((Platform1Color.g + Platform2Color.g) / 2f), ((Platform1Color.b + Platform2Color.b) / 2f), 1f);
 
-                GetComponent<MeshRenderer>().material.color = NEWcolor;
-                GetComponent<LineRenderer>().material.color = NEWcolor + new Color(0.1f, 0.1f, 0.1f, 0.5f);
+
+
+                Color.RGBToHSV(PlayerNewColor, out float H, out float S, out float V);
+                PlayerNewColor = Color.HSVToRGB(H + 0.5f%1f, S, V);
+
+                GetComponent<MeshRenderer>().material.color = PlayerNewColor;
+                GetComponent<LineRenderer>().material.color = PlayerNewColor + new Color(0.1f, 0.1f, 0.1f, 0.5f);
 
 
 
@@ -153,7 +150,9 @@ public class DragShootScript : MonoBehaviour
             else if (LastCollidedObject == null) 
             {
                 LastCollidedObject = collision.gameObject;
-                collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
+                FloorOldColor = collision.gameObject.GetComponent<MeshRenderer>().materials.ElementAt(0).color;
+                FloorNewColor = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
+                StartCoroutine(collision.gameObject.GetComponent<GroundScript>().ColorChange(FloorOldColor, FloorNewColor));
             }
 
 

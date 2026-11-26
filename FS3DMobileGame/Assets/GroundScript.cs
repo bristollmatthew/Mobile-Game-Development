@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 public class GroundScript : MonoBehaviour
@@ -9,6 +11,8 @@ public class GroundScript : MonoBehaviour
     float startWidth = 0;
     float widthDecrease = 0.3f;
     float hightChange = 0;
+
+    private bool RoutineActive;
     public void StartShrinking()
     {
         if (isShrinking)
@@ -47,6 +51,28 @@ public class GroundScript : MonoBehaviour
 
             }
         }
+
+
     }
+    public IEnumerator ColorChange(Color StartColor, Color EndColor)
+    {
+        if (!RoutineActive)
+        {
+            RoutineActive = true;
+
+
+            for (float i = 0; i < 1;)
+            {
+                GetComponent<MeshRenderer>().material.color = Color.Lerp(StartColor, EndColor, i);
+                yield return new WaitForSeconds(0.1f);
+                i = i + 0.1f;
+
+            }
+            RoutineActive = false;
+        }
+
+
+    }
+
 
 }
