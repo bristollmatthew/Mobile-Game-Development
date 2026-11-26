@@ -18,13 +18,28 @@ public class PauseMenuScript : MonoBehaviour
     [SerializeField] private GameObject QuitButton;
     private InputAction Quit;
 
-    public GameObject MenuUI;
+    [SerializeField] private GameObject SettingsButton;
+    [SerializeField] private GameObject CloseSettingsButton;
+    private InputAction Settings;
+
+    [SerializeField] private GameObject RestScoreButton;
+    private InputAction ResetScore;
+
+
+    public GameObject PausePanel;
+    public GameObject SettingsPanel;
+
+
+    private GameSaveScript SavegamePointer;
 
     private void Start()
     {
+        SavegamePointer = GameSaveScript.First;
         Pause = inputActions.FindAction("Pause");
         Resume = inputActions.FindAction("Resume");
         Quit = inputActions.FindAction("Quit");
+        Settings = inputActions.FindAction("Settings");
+        ResetScore = inputActions.FindAction("ResetScore");
     }
     void Update()
     {
@@ -40,6 +55,14 @@ public class PauseMenuScript : MonoBehaviour
         {
             QuitGame();
         }
+        if (Settings.WasPressedThisFrame())
+        {
+            SettingsMenu();
+        }
+        if (ResetScore.WasPressedThisFrame())
+        {
+            SavegamePointer.ClearSave();
+        }
 
     }
     private void OnApplicationFocus(bool focus)
@@ -52,7 +75,7 @@ public class PauseMenuScript : MonoBehaviour
 
     public void ResumeGame()
     {
-        MenuUI.SetActive(false);
+        PausePanel.SetActive(false);
         PauseButton.SetActive(true);
         Time.timeScale = 1f;
         isPaused = false;
@@ -60,7 +83,7 @@ public class PauseMenuScript : MonoBehaviour
     public void PauseGame()
     {
         isPaused = true;
-        MenuUI.SetActive(true);
+        PausePanel.SetActive(true);
         PauseButton.SetActive(false);
         Time.timeScale = 0f;
     }
@@ -68,4 +91,18 @@ public class PauseMenuScript : MonoBehaviour
     {
         Application.Quit();
     }
+    public void SettingsMenu()
+    {
+        if (SettingsPanel.activeSelf == true)
+        {
+            SettingsPanel.SetActive(false);
+            PausePanel.SetActive(true);
+        }
+        else
+        {
+            SettingsPanel.SetActive(true);
+            PausePanel.SetActive(false);
+        }
+    }
+
 }

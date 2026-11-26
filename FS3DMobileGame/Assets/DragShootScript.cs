@@ -105,12 +105,19 @@ public class DragShootScript : MonoBehaviour
                 //In-game Stuff
                 Score++;
                 LastCollidedObject = collision.gameObject;
-                Instantiate(Particle, this.transform.position - new Vector3(0f,0.5f,4f), new Quaternion(0,-180,0,0));
-                var main = Particle.gameObject.GetComponent<ParticleSystem>().main;
 
+                var main = Particle.gameObject.GetComponent<ParticleSystem>().main;
+                main.startColor = FloorNewColor;
+                main.maxParticles = Score * 2;
+                Instantiate(Particle, this.transform.position - new Vector3(0f, 0.5f, 4f), new Quaternion(0, -180, 0, 0));
 
                 FloorNewColor = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
                 FloorOldColor = collision.gameObject.GetComponent<MeshRenderer>().material.color;
+
+
+
+                
+
 
                 StartCoroutine(collision.gameObject.GetComponent<GroundScript>().ColorChange(FloorOldColor, FloorNewColor));
 

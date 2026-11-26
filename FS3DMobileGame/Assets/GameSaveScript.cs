@@ -6,6 +6,11 @@ public class GameSaveScript : MonoBehaviour
 {
     public static GameSaveScript First;
     
+
+
+
+
+
     [Serializable]
     public class saveData
     {
@@ -81,5 +86,6 @@ public class GameSaveScript : MonoBehaviour
     {
         if (File.Exists(filePath))
             File.Delete(filePath);
+        currentData = new saveData();
     }
 }
